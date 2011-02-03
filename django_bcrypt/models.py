@@ -84,6 +84,15 @@ work factor is 2**log_rounds, and the default is 12
 
 This setting can be changed at any time without invalidating
 previously-generated hashes.
+
+Links
+=====
+
+View/download code
+  https://github.com/playfire/django-cache-backed-auth
+
+File a bug
+  https://github.com/playfire/django-cache-backed-auth/issues
 """
 
 import bcrypt
