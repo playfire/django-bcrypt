@@ -1,4 +1,4 @@
-django-bcrypt README
-====================
+django-bcrypt
+=============
 
-Documentation: http://playfire.github.com/django-bcrypt/
+Documentation/homepage: http://playfire.github.com/django-bcrypt/
