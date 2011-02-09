@@ -4,6 +4,7 @@ release = ''
 copyright = '2010, 2011 UUMC Ltd.'
 
 html_logo = 'playfire.png'
+html_theme = 'nature'
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx']
 html_title = "%s documentation" % project
 master_doc = 'index'
