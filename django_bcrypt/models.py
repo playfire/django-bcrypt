@@ -28,7 +28,7 @@ faster.
 TODO: Why this is not in Django.
 
 Installation
-============
+------------
 
 1. `py-bcrypt <http://www.mindrot.org/projects/py-bcrypt/>`_
    (``python-bcrypt`` on Debian GNU/Linux and derivatives)
@@ -53,21 +53,24 @@ Installation
     1 row in set (0.00 sec)
 
 
+Migrations
+----------
+
 Moving from with existing bcrypt patches
-========================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TODO
 
 Migrating existing SHA1 passwords to bcrypt
-===========================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TODO
 
 Configuration
-=============
+-------------
 
 ``USE_BCRYPT``
---------------
+~~~~~~~~~~~~~~
 
 Default: ``True``
 
@@ -75,7 +78,7 @@ Use this setting to disable monkey-patching support of bcrypt. This is useful
 when running tests as 
 
 ``BCRYPT_LOG_ROUNDS``
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 Default: ``12``
 
@@ -86,7 +89,7 @@ This setting can be changed at any time without invalidating
 previously-generated hashes.
 
 Links
-=====
+-----
 
 View/download code
   https://github.com/playfire/django-cache-backed-auth
