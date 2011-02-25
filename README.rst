@@ -1,4 +1,4 @@
 django-bcrypt
 =============
 
-Documentation: http://playfire.github.com/django-bcrypt/
+Documentation: http://code.playfire.com/django-bcrypt/
