@@ -74,8 +74,9 @@ Configuration
 
 Default: ``True``
 
-Use this setting to disable monkey-patching support of bcrypt. This is useful
-when running tests as 
+Use this setting to disable bcrypt password support. This is useful when
+running your testsuite - these ephemeral users do not require security and
+their passwords can take some time to generate.
 
 ``BCRYPT_LOG_ROUNDS``
 ~~~~~~~~~~~~~~~~~~~~~
