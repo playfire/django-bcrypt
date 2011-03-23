@@ -103,13 +103,17 @@ import bcrypt
 
 from django.conf import settings
 from django.contrib.auth import models
+from django.utils.crypto import constant_time_compare
 
 def check_password(raw_password, enc_password):
     if enc_password[0] == '$':
         algo = enc_password[1:].split('$', 1)[0]
         assert algo in ('2a', '2', 'bcrypt')
 
-        return enc_password == bcrypt.hashpw(raw_password, enc_password)
+        return constant_time_compare(
+            enc_password,
+            bcrypt.hashpw(raw_password, enc_password),
+        )
 
     return django_check_password(raw_password, enc_password)
 
