@@ -25,7 +25,6 @@ password of the kind described above, would take an entire day. Futhermore,
 this work factor is configurable so it can be increased as computers get
 faster.
 
-TODO: Why this is not in Django.
 
 Installation
 ------------
@@ -53,18 +52,28 @@ Installation
     1 row in set (0.00 sec)
 
 
-Migrations
-----------
-
-Moving from with existing bcrypt patches
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TODO
-
 Migrating existing SHA1 passwords to bcrypt
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------
 
-TODO
+Simply using ``django-bcrypt`` will result in new passwords (either for new
+users or users who use any change/forgotten password feature) to be encoded
+using the bcrypt algorithm. You cannot en-masse migrate existing SHA1 hashes as
+they are by-definition not reversible.
+
+However, you can convert users' passwords when they login next::
+
+    def login(request):
+        if request.method == 'POST':
+            form = AuthenticationForm(request.POST)
+
+            if form.is_valid():
+                user = form.get_user()
+
+                if user.password.startswith('sha1'):
+                    user.set_password(form['password'])
+                    user.save()
+
+                # [etc]
 
 Configuration
 -------------
