@@ -102,10 +102,10 @@ Links
 -----
 
 View/download code
-  https://github.com/playfire/django-cache-backed-auth
+  https://github.com/playfire/django-bcrypt
 
 File a bug
-  https://github.com/playfire/django-cache-backed-auth/issues
+  https://github.com/playfire/django-bcrypt/issues
 """
 
 import bcrypt
