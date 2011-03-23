@@ -104,6 +104,7 @@ import bcrypt
 from django.conf import settings
 from django.contrib.auth import models
 from django.utils.crypto import constant_time_compare
+from django.utils.encoding import smart_str
 
 def check_password(raw_password, enc_password):
     if enc_password[0] == '$':
@@ -112,7 +113,7 @@ def check_password(raw_password, enc_password):
 
         return constant_time_compare(
             enc_password,
-            bcrypt.hashpw(raw_password, enc_password),
+            bcrypt.hashpw(smart_str(raw_password), enc_password),
         )
 
     return django_check_password(raw_password, enc_password)
@@ -122,7 +123,7 @@ def set_password(self, raw_password):
         self.set_unusable_password()
     else:
         self.password = bcrypt.hashpw(
-            raw_password,
+            smart_str(raw_password),
             bcrypt.gensalt(getattr(settings, 'BCRYPT_LOG_ROUNDS', 12)),
         )
 
