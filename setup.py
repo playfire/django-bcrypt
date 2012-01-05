@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-bcrypt',
-    description="bcrypt password hash support for Django.",
+    description="bcrypt password hash support for Django < 1.4",
     version='0.1',
     url='http://code.playfire.com/django-bcrypt',
 

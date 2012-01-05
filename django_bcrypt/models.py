@@ -1,9 +1,9 @@
 """
-:mod:`django-bcrypt` --- bcrypt support for Django
-==================================================
+:mod:`django-bcrypt` --- bcrypt support for Django < 1.4
+========================================================
 
-`Django <http://www.djangoproject.com/>`_ ships with support for the following
-password hash algorithms:
+`Django <http://www.djangoproject.com/>`_ < 1.4 shipped with support for the
+following password hash algorithms:
 
  * SHA1 (default)
  * MD5 (deprecated)
@@ -25,11 +25,52 @@ password of the kind described above, would take an entire day. Futhermore,
 this work factor is configurable so it can be increased as computers get
 faster.
 
+Compatibility with Django 1.4
+-----------------------------
+
+If you are using Django 1.4 or later and wish to start hashing passwords using
+bcrypt, you cannot use ``django-bcrypt``. Instead, insert::
+
+    'django.contrib.auth.hashers.BCryptPasswordHasher'
+
+to the top of ``settings.PASSWORD_HASHERS``.
+
+Upgrading to Django 1.4?
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you were previously using ``django-bcrypt`` and now wish to upgrade to
+Django 1.4 or later, you must perform the following steps:
+
+1. Prepend ``"bcrypt$"`` to rows in the ``auth_user`` SQL table that were
+   hashed using ``django-bcrypt``. This is because ``django-bcrypt`` stored the
+   passwords in the following form::
+
+    $2a$11$QLN6YLzsNzI3dmkm6txDueWQpFxyLpTACEv5FHsCtNOsT8H2KI7OS
+
+   whilst Django 1.4 requires the algorithm to be more explicit::
+
+    bcrypt$$2a$11$QLN6YLzsNzI3dmkm6txDueWQpFxyLpTACEv5FHsCtNOsT8H2KI7OS
+
+   In MySQL you can do this by executing::
+
+       UPDATE auth_user SET password = CONCAT('bcrypt$', password) WHERE password LIKE '$2a$%';
+
+2. If you previously modified ``settings.BCRYPT_LOG_ROUNDS`` you will need to
+   extend ``django.contrib.auth.hashers.BCryptPasswordHasher`` to set your own
+   value.
+
+3. If you used ``settings.USE_BCRYPT`` to disable bcrypt in some environments,
+   you will need to modify this to set different contents of
+   ``settings.PASSWORD_HASHERS`` instead.
+
+4. You can then simply remove ``django_bcrypt`` from your ``INSTALLED_APPS``
+   and deinstall ``django_bcrypt``.
+
 
 Installation
 ------------
 
-1. `py-bcrypt <http://www.mindrot.org/projects/py-bcrypt/>`_
+1. Install `py-bcrypt <http://www.mindrot.org/projects/py-bcrypt/>`_
    (``python-bcrypt`` on Debian GNU/Linux and derivatives)
 
 2. Add ``django_bcrypt`` to your ``INSTALLED_APPS``::
@@ -109,11 +150,20 @@ File a bug
 """
 
 import bcrypt
+import warnings
 
 from django.conf import settings
 from django.contrib.auth import models
 from django.utils.crypto import constant_time_compare
 from django.utils.encoding import smart_str
+from django.core.exceptions import ImproperlyConfigured
+
+if hasattr(settings, 'PASSWORD_HASHERS'):
+    warnings.warn("""
+django_bcrypt is not required or compatible with your version of Django
+(which now has BCrypt support built-in). You may need to modify the
+format of your existing passwords; please see the "Upgrading to Django
+1.4?" section in the django-bcrypt documentation.""", DeprecationWarning)
 
 def check_password(raw_password, enc_password):
     if enc_password[0] == '$':
