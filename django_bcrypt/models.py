@@ -55,7 +55,7 @@ Django 1.4 or later, you must perform the following steps:
 
        UPDATE auth_user SET password = CONCAT('bcrypt$', password) WHERE password LIKE '$2a$%';
 
-   In SQLite you can do this by executing::
+   In PostgeSQL and SQLite you can do this by executing::
 
        UPDATE auth_user SET password = 'bcrypt$' || password WHERE password LIKE '$2a$%';
 
