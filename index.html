@@ -1,0 +1,257 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>django-bcrypt — bcrypt support for Django &lt; 1.4 &mdash; django-bcrypt documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="django-bcrypt documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">django-bcrypt documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <span class="target" id="module-django_bcrypt.models"></span><div class="section" id="django-bcrypt-bcrypt-support-for-django-1-4">
+<h1><tt class="xref py py-mod docutils literal"><span class="pre">django-bcrypt</span></tt> &#8212; bcrypt support for Django &lt; 1.4<a class="headerlink" href="#django-bcrypt-bcrypt-support-for-django-1-4" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://www.djangoproject.com/">Django</a> &lt; 1.4 shipped with support for the
+following password hash algorithms:</p>
+<blockquote>
+<div><ul class="simple">
+<li>SHA1 (default)</li>
+<li>MD5 (deprecated)</li>
+<li>crypt</li>
+</ul>
+</div></blockquote>
+<p>These are general purpose functions, designed to calculate a digest in as short
+a time as possible. However, being fast is not a desirable property for a
+digest function for storing passwords: a modern computer can calculate the SHA1
+hash of hundreds of megabytes every second. If your users have passwords which
+are lowercase, alphanumeric, and 6 characters long, you can try every single
+possible password of that size in less than a minute. Django&#8217;s passwords are
+salted, but this doesn&#8217;t affect how fast an attacker can try a password given
+the hash and the salt from your database.</p>
+<p><a class="reference external" href="http://bcrypt.sourceforge.net/">bcrypt</a> solves this problem by being
+extremely slow - with a &#8220;work factor&#8221; of 12, bcrypt is approximately 4 orders
+of magnitude slower than SHA1. Instead of a single minute to a crack a short
+password of the kind described above, would take an entire day. Futhermore,
+this work factor is configurable so it can be increased as computers get
+faster.</p>
+<div class="section" id="compatibility-with-django-1-4">
+<h2>Compatibility with Django 1.4<a class="headerlink" href="#compatibility-with-django-1-4" title="Permalink to this headline">¶</a></h2>
+<p>If you are using Django 1.4 or later and wish to start hashing passwords using
+bcrypt, you cannot use <tt class="docutils literal"><span class="pre">django-bcrypt</span></tt>. Instead, insert:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="s">&#39;django.contrib.auth.hashers.BCryptPasswordHasher&#39;</span>
+</pre></div>
+</div>
+<p>to the top of <tt class="docutils literal"><span class="pre">settings.PASSWORD_HASHERS</span></tt>.</p>
+<div class="section" id="upgrading-to-django-1-4">
+<h3>Upgrading to Django 1.4?<a class="headerlink" href="#upgrading-to-django-1-4" title="Permalink to this headline">¶</a></h3>
+<p>If you were previously using <tt class="docutils literal"><span class="pre">django-bcrypt</span></tt> and now wish to upgrade to
+Django 1.4 or later, you must perform the following steps:</p>
+<ol class="arabic">
+<li><p class="first">Prepend <tt class="docutils literal"><span class="pre">&quot;bcrypt$&quot;</span></tt> to rows in the <tt class="docutils literal"><span class="pre">auth_user</span></tt> SQL table that were
+hashed using <tt class="docutils literal"><span class="pre">django-bcrypt</span></tt>. This is because <tt class="docutils literal"><span class="pre">django-bcrypt</span></tt> stored the
+passwords in the following form:</p>
+<div class="highlight-python"><pre>$2a$11$QLN6YLzsNzI3dmkm6txDueWQpFxyLpTACEv5FHsCtNOsT8H2KI7OS</pre>
+</div>
+<p>whilst Django 1.4 requires the algorithm to be more explicit:</p>
+<div class="highlight-python"><pre>bcrypt$$2a$11$QLN6YLzsNzI3dmkm6txDueWQpFxyLpTACEv5FHsCtNOsT8H2KI7OS</pre>
+</div>
+<p>In PostgeSQL and SQLite you can do this by executing:</p>
+<div class="highlight-python"><pre>UPDATE auth_user SET password = 'bcrypt$' || password WHERE password LIKE '$2a$%';</pre>
+</div>
+<p>In MySQL you can do this by executing:</p>
+<div class="highlight-python"><pre>UPDATE auth_user SET password = CONCAT('bcrypt$', password) WHERE password LIKE '$2a$%';</pre>
+</div>
+</li>
+<li><p class="first">If you previously modified <tt class="docutils literal"><span class="pre">settings.BCRYPT_LOG_ROUNDS</span></tt> you will need to
+extend <tt class="docutils literal"><span class="pre">django.contrib.auth.hashers.BCryptPasswordHasher</span></tt> to set your own
+value.</p>
+</li>
+<li><p class="first">If you used <tt class="docutils literal"><span class="pre">settings.USE_BCRYPT</span></tt> to disable bcrypt in some environments,
+you will need to modify this to set different contents of
+<tt class="docutils literal"><span class="pre">settings.PASSWORD_HASHERS</span></tt> instead.</p>
+</li>
+<li><p class="first">You can then simply remove <tt class="docutils literal"><span class="pre">django_bcrypt</span></tt> from your <tt class="docutils literal"><span class="pre">INSTALLED_APPS</span></tt>
+and deinstall <tt class="docutils literal"><span class="pre">django_bcrypt</span></tt>.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Install <a class="reference external" href="http://www.mindrot.org/projects/py-bcrypt/">py-bcrypt</a>
+(<tt class="docutils literal"><span class="pre">python-bcrypt</span></tt> on Debian GNU/Linux and derivatives)</p>
+</li>
+<li><p class="first">Add <tt class="docutils literal"><span class="pre">django_bcrypt</span></tt> to your <tt class="docutils literal"><span class="pre">INSTALLED_APPS</span></tt>:</p>
+<div class="highlight-python"><pre>INSTALLED_APPS = (
+    ...
+    'django_bcrypt',
+    ...
+)</pre>
+</div>
+</li>
+<li><p class="first">That&#8217;s it. New passwords (eg. for new users or when changing/resetting your
+password) will now use bcrypt:</p>
+<div class="highlight-python"><pre>&gt; SELECT id, username, password FROM auth_user WHERE username = 'lamby';
++-------+----------+--------------------------------------------------------------+
+| id    | username | password                                                     |
++-------+----------+--------------------------------------------------------------+
+| 15670 | lamby    | $2a$12$BENgnHkhQxDQ2t51g260ueUFEa9bQiBrJpS42p8v58AcD0.hllMw6 |
++-------+----------+--------------------------------------------------------------+
+1 row in set (0.00 sec)</pre>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="migrating-existing-sha1-passwords-to-bcrypt">
+<h2>Migrating existing SHA1 passwords to bcrypt<a class="headerlink" href="#migrating-existing-sha1-passwords-to-bcrypt" title="Permalink to this headline">¶</a></h2>
+<p>Simply using <tt class="docutils literal"><span class="pre">django-bcrypt</span></tt> will result in new passwords (either for new
+users or users who use any change/forgotten password feature) to be encoded
+using the bcrypt algorithm. You cannot en-masse migrate existing SHA1 hashes as
+they are by-definition not reversible.</p>
+<p>However, you can convert users&#8217; passwords when they login next:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">AuthenticationForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">get_user</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;sha1&#39;</span><span class="p">):</span>
+                <span class="n">user</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">form</span><span class="p">[</span><span class="s">&#39;password&#39;</span><span class="p">])</span>
+                <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="c"># [etc]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="use-bcrypt">
+<h3><tt class="docutils literal"><span class="pre">USE_BCRYPT</span></tt><a class="headerlink" href="#use-bcrypt" title="Permalink to this headline">¶</a></h3>
+<p>Default: <tt class="xref docutils literal"><span class="pre">True</span></tt></p>
+<p>Use this setting to disable bcrypt password support. This is useful when
+running your testsuite - these ephemeral users do not require security and
+their passwords can take some time to generate.</p>
+</div>
+<div class="section" id="bcrypt-log-rounds">
+<h3><tt class="docutils literal"><span class="pre">BCRYPT_LOG_ROUNDS</span></tt><a class="headerlink" href="#bcrypt-log-rounds" title="Permalink to this headline">¶</a></h3>
+<p>Default: <tt class="docutils literal"><span class="pre">12</span></tt></p>
+<p>The number of rounds determines the complexity of the bcrypt algorithm. The
+work factor is 2**log_rounds, and the default is 12</p>
+<p>This setting can be changed at any time without invalidating
+previously-generated hashes.</p>
+</div>
+</div>
+<div class="section" id="links">
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>View/download code</dt>
+<dd><a class="reference external" href="https://github.com/playfire/django-bcrypt">https://github.com/playfire/django-bcrypt</a></dd>
+<dt>File a bug</dt>
+<dd><a class="reference external" href="https://github.com/playfire/django-bcrypt/issues">https://github.com/playfire/django-bcrypt/issues</a></dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="#">
+              <img class="logo" src="_static/playfire.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">django-bcrypt</span></tt> &#8212; bcrypt support for Django &lt; 1.4</a><ul>
+<li><a class="reference internal" href="#compatibility-with-django-1-4">Compatibility with Django 1.4</a><ul>
+<li><a class="reference internal" href="#upgrading-to-django-1-4">Upgrading to Django 1.4?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#migrating-existing-sha1-passwords-to-bcrypt">Migrating existing SHA1 passwords to bcrypt</a></li>
+<li><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li><a class="reference internal" href="#use-bcrypt"><tt class="docutils literal"><span class="pre">USE_BCRYPT</span></tt></a></li>
+<li><a class="reference internal" href="#bcrypt-log-rounds"><tt class="docutils literal"><span class="pre">BCRYPT_LOG_ROUNDS</span></tt></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#links">Links</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">django-bcrypt documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, 2011 UUMC Ltd..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>
