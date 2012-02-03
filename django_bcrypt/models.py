@@ -51,13 +51,13 @@ Django 1.4 or later, you must perform the following steps:
 
     bcrypt$$2a$11$QLN6YLzsNzI3dmkm6txDueWQpFxyLpTACEv5FHsCtNOsT8H2KI7OS
 
-   In MySQL you can do this by executing::
-
-       UPDATE auth_user SET password = CONCAT('bcrypt$', password) WHERE password LIKE '$2a$%';
-
    In PostgeSQL and SQLite you can do this by executing::
 
        UPDATE auth_user SET password = 'bcrypt$' || password WHERE password LIKE '$2a$%';
+
+   In MySQL you can do this by executing::
+
+       UPDATE auth_user SET password = CONCAT('bcrypt$', password) WHERE password LIKE '$2a$%';
 
 2. If you previously modified ``settings.BCRYPT_LOG_ROUNDS`` you will need to
    extend ``django.contrib.auth.hashers.BCryptPasswordHasher`` to set your own
